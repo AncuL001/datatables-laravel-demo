@@ -12,7 +12,14 @@ class EmployeeController extends Controller
 
     function order(Request $request, Builder $query): Builder {
         if ($request['order'] && $request['order'][0]['column'] != '' ) {
-            $query->orderBy($request['order'][0]['name'], $request['order'][0]['dir']);
+            if ($request['order'][0]['name'] == 'name') {
+                $query->orderBy('first_name', $request['order'][0]['dir']);
+                $query->orderBy('last_name', $request['order'][0]['dir']);
+            }
+
+            else {
+                $query->orderBy($request['order'][0]['name'], $request['order'][0]['dir']);
+            }
         }
 
         return $query;
@@ -40,6 +47,12 @@ class EmployeeController extends Controller
 
                 foreach ($request['columns'] as $index => $column) {
                     if ($column['searchable'] != "true") continue;
+
+                    if ($column['name'] == 'name') {
+                        $query->orWhere('first_name', 'like', '%' . $request['search']['value'] . '%');
+                        $query->orWhere('last_name', 'like', '%' . $request['search']['value'] . '%');
+                        continue;
+                    }
 
                     $query->orWhere($column['name'], 'like', '%' . $request['search']['value'] . '%');
                 }
